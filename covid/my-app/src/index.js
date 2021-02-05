@@ -5,10 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import mapboxgl, { GeolocateControl } from 'mapbox-gl';
 
+
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2hlZXNlMTIzIiwiYSI6ImNraWF6am44bjA4Njgyc211YWs0eXc5NGwifQ.qAQCFWPsR-SRFBvWVQl1bg';
-let usrLat;
-let usrLng;
-let usrCoords;
 class Application extends React.Component {
   constructor(props) {
     super(props);
@@ -18,14 +16,15 @@ class Application extends React.Component {
       zoom: 10
     };
   }
-  componentDidMount() {
+  async componentDidMount() {
     const map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [this.state.lng, this.state.lat],
       zoom: this.state.zoom
     });
-
+    let zipcodes = await App();
+    console.log(zipcodes);
     map.on('move', () => {
       this.setState({
         lng: map.getCenter().lng.toFixed(4),
@@ -42,9 +41,33 @@ class Application extends React.Component {
     });
     //add to map
     map.addControl(geolocate);
-    map.on('load', function() {
+    /*map.on('load', function() {
       geolocate.trigger();
-    });
+      map.addSource('maine', {
+        'type': 'geojson',
+        'data': {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Polygon',
+            'coordinates': [
+            [
+          
+            ]
+            ]
+          }
+        }
+        });
+        map.addLayer({
+        'id': 'maine',
+        'type': 'fill',
+        'source': 'maine',
+        'layout': {},
+        'paint': {
+        'fill-color': '#088',
+        'fill-opacity': 0.8
+        }
+        });
+    });*/
   }
   render() {
     return (
