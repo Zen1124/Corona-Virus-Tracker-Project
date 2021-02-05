@@ -3,17 +3,19 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { GeolocateControl } from 'mapbox-gl';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2hlZXNlMTIzIiwiYSI6ImNraWF6am44bjA4Njgyc211YWs0eXc5NGwifQ.qAQCFWPsR-SRFBvWVQl1bg';
-
+let usrLat;
+let usrLng;
+let usrCoords;
 class Application extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lng: 5,
-      lat: 34,
-      zoom: 2
+      lng: -74.0060,
+      lat: 40.730610,
+      zoom: 10
     };
   }
   componentDidMount() {
@@ -23,11 +25,31 @@ class Application extends React.Component {
       center: [this.state.lng, this.state.lat],
       zoom: this.state.zoom
     });
+
+    map.on('move', () => {
+      this.setState({
+        lng: map.getCenter().lng.toFixed(4),
+        lat: map.getCenter().lat.toFixed(4),
+        zoom: map.getZoom().toFixed(2)
+      });
+    });
+    //initialize usr location
+    var geolocate = new mapboxgl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        },
+        trackUserLocation: true
+    });
+    //add to map
+    map.addControl(geolocate);
+    map.on('load', function() {
+      geolocate.trigger();
+    });
   }
   render() {
     return (
-      <div>
-      <div ref={el => this.mapContainer = el} className="mapContainer" />
+      <div>   
+        <div ref={el => this.mapContainer = el} className="mapContainer"/>         
       </div>
     )
   }
