@@ -24,7 +24,13 @@ class Application extends React.Component {
       zoom: this.state.zoom
     });
     let zipcodes = await App();
-    console.log(zipcodes);
+    console.log(zipcodes.data[1][4].split(","));
+    let p = zipcodes.data[1][4].split(",");
+    p[0] = p[0].slice(16);
+    p[p.length-1] = p[p.length-1].replace(")))","");
+    console.log(p);
+
+    
     map.on('move', () => {
       this.setState({
         lng: map.getCenter().lng.toFixed(4),
@@ -41,33 +47,33 @@ class Application extends React.Component {
     });
     //add to map
     map.addControl(geolocate);
-    /*map.on('load', function() {
+    map.on('load', function() {
       geolocate.trigger();
-      map.addSource('maine', {
+      /*map.addSource('maine', {
         'type': 'geojson',
         'data': {
           'type': 'Feature',
           'geometry': {
             'type': 'Polygon',
-            'coordinates': [
+            'coordinates': 
             [
-          
+              
             ]
-            ]
+            
           }
         }
         });
         map.addLayer({
-        'id': 'maine',
-        'type': 'fill',
-        'source': 'maine',
-        'layout': {},
-        'paint': {
-        'fill-color': '#088',
-        'fill-opacity': 0.8
-        }
-        });
-    });*/
+          'id': 'maine',
+          'type': 'fill',
+          'source': 'maine',
+          'layout': {},
+          'paint': {
+            'fill-color': '#088',
+            'fill-opacity': 0.8
+          }
+        });*/
+    });
   }
   render() {
     return (
