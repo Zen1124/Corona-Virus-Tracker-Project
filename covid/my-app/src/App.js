@@ -4,14 +4,13 @@ import React from 'react'
 import Papa from 'papaparse'
 
 async function readcsv(name){
-  var response = await fetch(process.env.PUBLIC_URL + name)
-  var reader = await response.body.getReader()
-  var decoder = new TextDecoder()
-  var result = await reader.read()
-  var csv = await decoder.decode(result.value)
-  //console.log(csv)
-  console.log(Papa.parse(csv, { header: false }))
-  return Papa.parse(csv, { header: false })
+  let data
+  await fetch(process.env.PUBLIC_URL + name).then(response => response.text())
+  .then(text =>{
+    data = text
+  })
+  console.log(Papa.parse(data, { header: false }))
+  return Papa.parse(data, { header: false })
 }
 
 function App() {
