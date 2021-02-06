@@ -3,31 +3,82 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { GeolocateControl } from 'mapbox-gl';
+
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2hlZXNlMTIzIiwiYSI6ImNraWF6am44bjA4Njgyc211YWs0eXc5NGwifQ.qAQCFWPsR-SRFBvWVQl1bg';
-
 class Application extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lng: 5,
-      lat: 34,
-      zoom: 2
+      lng: -74.0060,
+      lat: 40.730610,
+      zoom: 10
     };
   }
-  componentDidMount() {
+  async componentDidMount() {
     const map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [this.state.lng, this.state.lat],
       zoom: this.state.zoom
     });
+    let zipcodes = await App();
+    console.log(zipcodes.data[1][4].split(","));
+    let p = zipcodes.data[1][4].split(",");
+    p[0] = p[0].slice(16);
+    p[p.length-1] = p[p.length-1].replace(")))","");
+    console.log(p);
+
+    
+    map.on('move', () => {
+      this.setState({
+        lng: map.getCenter().lng.toFixed(4),
+        lat: map.getCenter().lat.toFixed(4),
+        zoom: map.getZoom().toFixed(2)
+      });
+    });
+    //initialize usr location
+    var geolocate = new mapboxgl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        },
+        trackUserLocation: true
+    });
+    //add to map
+    map.addControl(geolocate);
+    map.on('load', function() {
+      geolocate.trigger();
+      /*map.addSource('maine', {
+        'type': 'geojson',
+        'data': {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Polygon',
+            'coordinates': 
+            [
+              
+            ]
+            
+          }
+        }
+        });
+        map.addLayer({
+          'id': 'maine',
+          'type': 'fill',
+          'source': 'maine',
+          'layout': {},
+          'paint': {
+            'fill-color': '#088',
+            'fill-opacity': 0.8
+          }
+        });*/
+    });
   }
   render() {
     return (
-      <div>
-      <div ref={el => this.mapContainer = el} className="mapContainer" />
+      <div>   
+        <div ref={el => this.mapContainer = el} className="mapContainer"/>         
       </div>
     )
   }
