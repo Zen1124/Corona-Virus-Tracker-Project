@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import mapboxgl, { GeolocateControl } from 'mapbox-gl';
+import neighborhoods from './nyc-neighborhoods.json';
 
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2hlZXNlMTIzIiwiYSI6ImNraWF6am44bjA4Njgyc211YWs0eXc5NGwifQ.qAQCFWPsR-SRFBvWVQl1bg';
@@ -22,14 +23,7 @@ class Application extends React.Component {
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [this.state.lng, this.state.lat],
       zoom: this.state.zoom
-    });
-    let zipcodes = await App();
-    console.log(zipcodes.data[1][4].split(","));
-    let p = zipcodes.data[1][4].split(",");
-    p[0] = p[0].slice(16);
-    p[p.length-1] = p[p.length-1].replace(")))","");
-    console.log(p);
-
+    });  
     
     map.on('move', () => {
       this.setState({
@@ -45,35 +39,58 @@ class Application extends React.Component {
         },
         trackUserLocation: true
     });
+    //let colors = [];
     //add to map
+    let hoveredNycId = null;
     map.addControl(geolocate);
     map.on('load', function() {
       geolocate.trigger();
-      /*map.addSource('maine', {
+      map.addSource('nyc', {
         'type': 'geojson',
-        'data': {
-          'type': 'Feature',
-          'geometry': {
-            'type': 'Polygon',
-            'coordinates': 
-            [
-              
-            ]
-            
-          }
+        'data': neighborhoods
+      });
+      map.addLayer({
+        'id': 'nyc-fill',
+        'type': 'fill',
+        'source': 'nyc',
+        'layout': {},
+        'paint': {
+          'fill-color': '#088',
+          'fill-opacity': ['case',
+            ['boolean', ['feature-state', 'hover'], false],
+            1,
+            0.5],
+          'fill-outline-color': '#000'
         }
-        });
-        map.addLayer({
-          'id': 'maine',
-          'type': 'fill',
-          'source': 'maine',
-          'layout': {},
-          'paint': {
-            'fill-color': '#088',
-            'fill-opacity': 0.8
-          }
-        });*/
+      });
     });
+    map.on('mousemove', 'nyc-fills', function (e) {
+      if (e.features.length > 0) {
+        if (hoveredNycId) {
+          map.setFeatureState(
+            { source: 'states', id: hoveredNycId },
+            { hover: false }
+          );
+        }
+        hoveredNycId = e.features[0].id;
+        map.setFeatureState(
+          { source: 'states', id: hoveredNycId },
+          { hover: true }
+        );
+      }
+    });
+       
+      // When the mouse leaves the state-fill layer, update the feature state of the
+      // previously hovered feature.
+      map.on('mouseleave', 'state-fills', function () {
+        if (hoveredNycId) {
+          map.setFeatureState(
+            { source: 'states', id: hoveredNycId },
+            { hover: false }
+          );
+        }
+        hoveredNycId = null;
+      });
   }
   render() {
     return (
